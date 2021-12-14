@@ -1,0 +1,55 @@
+---
+Parameters:
+  DBPASS:
+    Description: password for databse
+    Type: String
+    NoEcho: true
+    Default: password
+  DBMasterUser:
+    Description: master user for database
+    Type: String
+    Default: starwars
+    NoEcho: true
+Resources:
+  DBPassword:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: DBPASS
+      Description: password for databse
+      Tier: Standard
+      Type: String 
+      Value: !Ref DBPASS
+  DBMASTERUSER:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: DBMasterUser
+      Description: password for databse
+      Tier: Standard
+      Type: String 
+      Value: !Ref DBMasterUser
+  SONARTOKEN:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: SONARTOKEN
+      Description: Sonarqube token
+      Tier: Standard
+      Type: String 
+      Value: "5a04f74d21d5d3ced8eaf8e83f9dcb3150ef3380"
+  SONARORG:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: SONARORG
+      Description: Sonarqube token
+      Tier: Standard
+      Type: String 
+      Value: "diploma"
+  SONARPROJECTKEY:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: SONARPROJECTKEY
+      Description: Sonarqube token
+      Tier: Standard
+      Type: String 
+      Value: "diploma_project"
+
+      

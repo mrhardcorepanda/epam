@@ -1,0 +1,77 @@
+Parameters:
+  EksStack:
+    Description: EKS stack name
+    Type: String
+    Default: eksctl-eks-acg-cluster
+  R53domain:
+    Description: r53 domain name
+    Type: String
+    Default: "logs.saska.click"
+  DomainName:
+    Description: User-defined OpenSearch domain name
+    Type: String
+  InstanceType:
+    Type: String
+    Default: t2.small.search
+  SGName:
+    Type: String
+    Default: "es-logs-sg"
+Resources:
+  OpensearchDomain:
+    Description: OpenSearchServiceDomain resource
+    Type: AWS::OpenSearchService::Domain
+    Properties: 
+      VPCOptions:
+        SubnetIds:
+          - !Select [1, !Split [ "," , Fn::ImportValue: {Fn::Sub: "${EksStack}::SubnetsPrivate"} ]]
+        SecurityGroupIds:
+          - Ref: mySecurityGroup
+      DomainName:
+        Ref: DomainName
+      ClusterConfig:
+        InstanceCount: '1'
+        InstanceType:
+          Ref: InstanceType
+      EBSOptions:
+        EBSEnabled: true
+        Iops: '0'
+        VolumeSize: '10'
+        VolumeType: 'standard'
+      DomainEndpointOptions:
+        CustomEndpoint: logs.saska.click
+        CustomEndpointCertificateArn: !Ref Certificate
+        CustomEndpointEnabled: true
+        EnforceHTTPS: true
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName:
+        Fn::Sub: "*.${R53domain}"
+      SubjectAlternativeNames:
+      - Fn::Sub: "${R53domain}"
+      ValidationMethod: DNS
+  mySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SecutirtyGroup for elastic 
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: "${EksStack}::VPC"
+      GroupName:
+        Ref: SGName
+      SecurityGroupIngress:
+        - FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+Outputs:
+  Arn:
+    Value:
+      'Fn::GetAtt':
+        - OpensearchDomain
+        - Arn
+  DomainEndpoint:
+    Value:
+      'Fn::GetAtt':
+        - OpensearchDomain
+        - DomainEndpoint

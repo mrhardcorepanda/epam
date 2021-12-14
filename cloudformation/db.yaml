@@ -1,0 +1,77 @@
+Resources:
+  DBASG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: DBASG
+      GroupDescription: DBASG
+      VpcId: 
+        Fn::ImportValue:
+          Fn::Sub: "${EksStack}::VPC"
+      Tags:
+        - Key: Name
+          Value: !Join
+          - ''
+          - - 'Net'
+            - !Ref 'AWS::StackName'
+            - ' DBA SG'
+  MyDB:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      EngineVersion: 12
+      DBName: DiplomaDB
+      DBInstanceIdentifier: !Ref 'AWS::StackName'
+      Engine: postgres
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref DBPASS
+      DBInstanceClass: !Ref DBInstanceType
+      DBSubnetGroupName: !Ref rdsDBSubnetGroup
+      AllocatedStorage: 20
+      AvailabilityZone: !Ref WebAZ
+      VPCSecurityGroups: 
+        - !Ref DBASG
+  rdsDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DBA SUBNET GROUP
+      SubnetIds:
+          !Split [ "," , Fn::ImportValue: {Fn::Sub: "${EksStack}::SubnetsPrivate"} ]
+  DBEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: DBEndpoint
+      Description: url of databse
+      Tier: Standard
+      Type: String 
+      Value: 
+        Fn::GetAtt: MyDB.Endpoint.Address
+  DBPort:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Name: DBPort
+      Description: port of databse
+      Tier: Standard
+      Type: String 
+      Value: 
+        Fn::GetAtt: MyDB.Endpoint.Port
+Parameters:
+  EksStack:
+    Type: String
+    Description: VPC cloudformation stack name
+    Default: "eksctl-eks-acg-cluster"
+  DBInstanceType:
+    Description: Instace Type for RDS
+    Default: db.t2.micro
+    Type: String
+  DBPASS:
+    Description: Password for database
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: DBPASS
+    NoEcho: true
+  MasterUsername:
+    Description: Master User for databse
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: DBMasterUser
+    NoEcho: true
+  WebAZ:
+    Description: Two availability zones for Web
+    Type: AWS::EC2::AvailabilityZone::Name
