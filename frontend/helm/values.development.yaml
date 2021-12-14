@@ -1,0 +1,5 @@
+image:
+  repository: 826018717787.dkr.ecr.us-east-2.amazonaws.com/frontend
+
+api:
+  url: https://api.dev.saksa.click

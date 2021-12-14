@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: 826018717787.dkr.ecr.us-east-2.amazonaws.com/frontend
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: NodePort
+  port: 80
+  name: front-end-service
+
+resources: {}
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+api:
+  url: https://api.dev.saska.click
