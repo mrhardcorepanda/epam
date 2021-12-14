@@ -1,0 +1,18 @@
+# NOTE: When installing, please, update this file with the correct subdomain!
+
+ingress:
+  internal:
+    annotations: 
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/actions.redirect: "{\"Type\": \"redirect\", \"RedirectConfig\": {\"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTP\":80,\"HTTPS\": 443}]"
+      alb.ingress.kubernetes.io/load-balancer-attributes: "idle_timeout.timeout_seconds=360"
+    path: /
+    hosts:
+      - hostname: starwars-api.dev.saska.click
+        serviceName: starwars-service
+        port: 80
+      - hostname: starwars.dev.saska.click
+        serviceName: front-end-service-proxy
+        port: 80
